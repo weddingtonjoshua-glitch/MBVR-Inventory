@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>MBVR Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --navy:       #1B2D42;
+    --navy-mid:   #243750;
+    --navy-light: #EAF0F6;
+    --teal:       #2A9DB5;
+    --teal-dark:  #1B7A8E;
+    --teal-light: #E2F4F8;
+    --teal-mid:   #B3E2EE;
+    --gold:       #C9963A;
+    --amber-bg:   #FEF3E2;
+    --amber-text: #7A5212;
+    --amber-bdr:  #C9963A;
+    --green-bg:   #E5F5EE;
+    --green-text: #1A6645;
+    --green-bdr:  #2A9B65;
+    --red-bg:     #FCEAEA;
+    --red-text:   #8B2020;
+    --red-bdr:    #D94F4F;
+    --bg:         #FFFFFF;
+    --bg2:        #F4F7FA;
+    --bg3:        #E8EEF4;
+    --text:       #1B2D42;
+    --text2:      #5A6E82;
+    --border:     rgba(27,45,66,0.1);
+    --border2:    rgba(27,45,66,0.2);
+    --radius:     10px;
+    --radius-lg:  14px;
+    --font:       'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111C27; --bg2: #182436; --bg3: #1F2E3F;
+      --text: #E8F0F8; --text2: #7A9AB8;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.15);
+      --navy-light: #1F2E3F; --teal-light: #0F2A33;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: var(--font); background: var(--bg3); color: var(--text); min-height: 100vh; }
+  #app { max-width: 480px; margin: 0 auto; background: var(--bg); min-height: 100vh; }
+
+  /* ── INPUTS ── */
+  input, select, textarea {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: var(--font); font-size: 15px; width: 100%;
+    padding: 12px 14px; outline: none; -webkit-appearance: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--teal); box-shadow: 0 0 0 3px rgba(42,157,181,0.18);
+  }
+  textarea { resize: none; line-height: 1.5; }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6E82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy);
+    padding: 0 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .logo-text-main { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.1; letter-spacing: -0.01em; }
+  .logo-text-sub  { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.04em; text-transform: uppercase; margin-top: 1px; }
+  .header-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--teal); background: rgba(42,157,181,0.15);
+    padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(42,157,181,0.3);
+  }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; padding: 10px 0; }
+  .tab {
+    flex: 1; padding: 8px 0; background: transparent; border: none;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 5px; color: rgba(255,255,255,0.45); font-family: var(--font);
+    transition: all 0.15s;
+  }
+  .tab.active { background: rgba(42,157,181,0.2); color: #fff; }
+  .tab-badge {
+    background: var(--teal); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 20px;
+  }
+
+  /* ── CONTENT ── */
+  .content { padding: 20px 16px 100px; }
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text2); margin-bottom: 7px; display: block;
+  }
+  .field { margin-bottom: 16px; }
+
+  /* ── ACTION BUTTONS ── */
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .act-btn {
+    padding: 12px 6px; border-radius: var(--radius); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    border: 1px solid var(--border2); background: var(--bg2);
+    font-family: var(--font); transition: all 0.15s;
+  }
+  .act-btn i { font-size: 20px; color: var(--text2); }
+  .act-btn span { font-size: 11px; font-weight: 500; color: var(--text2); line-height: 1.3; text-align: center; }
+  .act-btn.sel-taking    { border-color: var(--teal);       background: var(--teal-light); }
+  .act-btn.sel-taking    i, .act-btn.sel-taking span    { color: var(--teal-dark); }
+  .act-btn.sel-restocking { border-color: var(--green-bdr); background: var(--green-bg); }
+  .act-btn.sel-restocking i, .act-btn.sel-restocking span { color: var(--green-text); }
+  .act-btn.sel-low_stock  { border-color: var(--amber-bdr); background: var(--amber-bg); }
+  .act-btn.sel-low_stock  i, .act-btn.sel-low_stock span  { color: var(--amber-text); }
+
+  /* ── ITEM ENTRY BOX ── */
+  .item-entry-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px; margin-bottom: 10px;
+  }
+  .item-name-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .item-name-row input { flex: 1; }
+  .add-btn {
+    padding: 12px 18px; background: var(--navy); border: none;
+    border-radius: var(--radius); color: #fff; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    white-space: nowrap; flex-shrink: 0; font-family: var(--font);
+    transition: background 0.15s;
+  }
+  .add-btn:active { background: var(--navy-mid); transform: scale(0.97); }
+  .item-controls { display: flex; align-items: center; gap: 10px; }
+  .qty-group { display: flex; align-items: center; gap: 8px; }
+  .qty-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid var(--border2); background: var(--bg);
+    font-size: 17px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; color: var(--text); flex-shrink: 0; font-family: var(--font);
+  }
+  .qty-num { font-size: 16px; font-weight: 700; min-width: 22px; text-align: center; color: var(--text); }
+  .ctrl-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+  .low-toggle { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .toggle-track { width: 38px; height: 22px; border-radius: 11px; position: relative; flex-shrink: 0; transition: background 0.2s; }
+  .toggle-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 3px; transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .cam-btn {
+    margin-left: auto; width: 36px; height: 36px; border-radius: var(--radius);
+    border: 1px solid var(--border2); background: var(--bg);
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .cam-btn.has-photo { border-color: var(--teal); background: var(--teal-light); }
+  .cam-btn i { font-size: 18px; color: var(--text2); }
+  .cam-btn.has-photo i { color: var(--teal-dark); }
+  .pending-photo { position: relative; margin-top: 12px; }
+  .pending-photo img { width: 100%; max-height: 150px; object-fit: cover; border-radius: var(--radius); display: block; }
+  .pending-photo-remove {
+    position: absolute; top: 7px; right: 7px; background: rgba(0,0,0,0.55);
+    border: none; border-radius: 50%; width: 28px; height: 28px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff;
+  }
+
+  /* ── ITEM LIST ── */
+  .item-list { margin-bottom: 10px; }
+  .item-row {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 8px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(27,45,66,0.06);
+  }
+  .item-row-top { display: flex; align-items: center; gap: 10px; padding: 11px 13px; }
+  .item-row-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    font-size: 11px; font-weight: 700; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .item-row-info { flex: 1; min-width: 0; }
+  .item-row-name { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item-row-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+  .item-thumb { width: 46px; height: 46px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid var(--border); }
+  .remove-btn { background: transparent; border: none; cursor: pointer; padding: 5px; color: var(--text2); flex-shrink: 0; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 20px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── VOICE / NOTES ── */
+  .voice-btn {
+    width: 100%; padding: 13px; border: 1px solid var(--border2);
+    border-radius: var(--radius); background: var(--bg2);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; font-family: var(--font); font-size: 14px; font-weight: 500;
+    color: var(--text2); margin-bottom: 14px; transition: all 0.15s;
+  }
+  .voice-btn.active { border-color: var(--red-bdr); background: var(--red-bg); color: var(--red-text); }
+
+  /* ── SUBMIT BUTTON ── */
+  .submit-btn {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    border: none; border-radius: var(--radius); color: #fff;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: var(--font); letter-spacing: 0.01em;
+    box-shadow: 0 4px 14px rgba(42,157,181,0.35);
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .submit-btn:active { transform: scale(0.99); opacity: 0.9; }
+  .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+  /* ── SUCCESS BANNER ── */
+  .success-banner {
+    background: var(--green-bg); border: 1px solid var(--green-bdr);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  /* ── LOG CARDS ── */
+  .entry-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); margin-bottom: 12px; overflow: hidden;
+    box-shadow: 0 2px 6px rgba(27,45,66,0.07);
+  }
+  .entry-card-header {
+    background: var(--navy); padding: 10px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .entry-card-body { padding: 12px 14px; }
+  .entry-meta { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+  .entry-item { padding: 8px 0; border-top: 1px solid var(--border); }
+  .entry-item-row { display: flex; align-items: center; justify-content: space-between; }
+  .entry-item-photo { width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-top: 8px; display: block; }
+  .entry-note { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+  /* ── VELOCITY ── */
+  .vel-section { background: var(--navy); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 20px; }
+  .vel-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+  .vel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .vel-rank { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); width: 14px; text-align: right; }
+  .vel-name { font-size: 13px; font-weight: 500; flex: 1; color: #fff; }
+  .vel-count { font-size: 11px; font-weight: 700; color: var(--teal); background: rgba(42,157,181,0.15); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+  .vel-bar-bg { width: 52px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+  .vel-bar { height: 100%; background: var(--teal); border-radius: 2px; }
+
+  .empty-state { text-align: center; padding: 60px 0; color: var(--text2); }
+  .empty-state i { font-size: 44px; display: block; margin-bottom: 12px; color: var(--bg3); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+const EMAILJS_PUBLIC_KEY  = '2iypbJ-82q0_M0PW5';
+const EMAILJS_SERVICE_ID  = 'service_ivntct2';
+const EMAILJS_TEMPLATE_ID = 'template_uxmbw3d';
+const NOTIFY_EMAIL        = 'weddington.joshua@gmail.com';
+
+const ACTIONS = [
+  { id:'taking',    label:'Taking Items',    icon:'ti-package-export', badge:'Took',      bg:'#E2F4F8', color:'#1B7A8E' },
+  { id:'restocking',label:'Restocking',      icon:'ti-package-import', badge:'Restocked', bg:'#E5F5EE', color:'#1A6645' },
+  { id:'low_stock', label:'Low Stock Alert', icon:'ti-alert-triangle', badge:'Low Stock', bg:'#FEF3E2', color:'#7A5212' }
+];
+const KEY = 'mbvr_inventory_v2';
+// Init EmailJS once on load
+if (typeof emailjs !== 'undefined') emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+let S = {
+  tab:'submit', log:[],
+  prop:'', staff:'', action:'taking',
+  itemName:'', itemQty:1, itemLow:false, pendingImg:null,
+  items:[],
+  note:'', listening:false, done:false,
+  logFilter:''
+};
+let recog = null;
+
+function loadLog() { try { const d=localStorage.getItem(KEY); if(d) S.log=JSON.parse(d); } catch {} }
+function saveLog() { try { localStorage.setItem(KEY, JSON.stringify(S.log.slice(0,500))); } catch {} }
+function fmtDate(ts) {
+  const d=new Date(ts);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' +
+         d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function velocity() {
+  const m={};
+  S.log.forEach(e=>{ if(e.action==='taking'&&e.items) e.items.forEach(i=>{ m[i.name]=(m[i.name]||0)+(i.qty||1); }); });
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,6);
+}
+function compress(file,cb) {
+  const canvas=document.createElement('canvas'), img=new Image(), url=URL.createObjectURL(file);
+  img.onload=()=>{
+    let w=img.width,h=img.height,max=700;
+    if(w>max){h=h*max/w;w=max;} if(h>max){w=w*max/h;h=max;}
+    canvas.width=w; canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',0.72)); URL.revokeObjectURL(url);
+  }; img.src=url;
+}
+function toggleVoice() {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Voice input not supported. Try Chrome on Android.');return;}
+  if(S.listening){recog&&recog.stop();S.listening=false;render();return;}
+  const r=new SR(); r.continuous=false; r.interimResults=false;
+  r.onresult=e=>{S.note=(S.note+(S.note?' ':'')+e.results[0][0].transcript).trim();S.listening=false;render();};
+  r.onerror=r.onend=()=>{S.listening=false;render();};
+  r.start(); recog=r; S.listening=true; render();
+}
+function addItem() {
+  const name=S.itemName.trim(); if(!name) return;
+  S.items=[...S.items,{id:Date.now(),name,qty:S.itemQty,low:S.itemLow,img:S.pendingImg}];
+  S.itemName=''; S.itemQty=1; S.itemLow=false; S.pendingImg=null;
+  render();
+  setTimeout(()=>{const el=document.getElementById('itemInput');if(el)el.focus();},50);
+}
+function removeItem(id){S.items=S.items.filter(i=>i.id!==id);render();}
+function handlePendingPhoto(input){
+  const f=input.files[0]; if(!f) return;
+  compress(f,src=>{S.pendingImg=src;render();});
+}
+async function sendEmail(entry){
+  if(EMAILJS_PUBLIC_KEY==='YOUR_PUBLIC_KEY') return;
+  const am=Object.fromEntries(ACTIONS.map(a=>[a.id,a]));
+  const itemLines=entry.items.map(i=>`  • ${i.name} ×${i.qty}${i.low?' ⚠️ LOW STOCK':''}${i.img?' 📷':''}`).join('\n');
+  try {
+
+    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+      to_email:NOTIFY_EMAIL,property:entry.property,staff:entry.staff,
+      action:am[entry.action].badge,items:itemLines,
+      note:entry.note||'None',timestamp:fmtDate(entry.ts)
+    });
+  } catch(e){console.warn('EmailJS:',e);}
+}
+async function submit(){
+  if(!S.prop.trim()||!S.staff.trim()||S.items.length===0){
+    alert('Please enter a property, your name, and add at least one item.');return;
+  }
+  const entry={id:Date.now(),property:S.prop.trim(),staff:S.staff.trim(),
+    action:S.action,items:S.items,note:S.note,ts:new Date().toISOString()};
+  S.log=[entry,...S.log]; saveLog();
+  await sendEmail(entry);
+  S.done=true; S.items=[]; S.itemName=''; S.itemQty=1; S.itemLow=false; S.pendingImg=null; S.note='';
+  render(); setTimeout(()=>{S.done=false;render();},3200);
+}
+function getProps(){return [...new Set(S.log.map(e=>e.property))].sort();}
+
+function render(){
+  const app=document.getElementById('app');
+  const vel=velocity(), props=getProps();
+  const filtered=S.logFilter?S.log.filter(e=>e.property===S.logFilter):S.log;
+  const am=Object.fromEntries(ACTIONS.map(a=>[a.id,a]));
+
+  app.innerHTML=`
+  <div class="header">
+    <div class="header-top">
+      <div class="header-logo">
+        <div class="logo-mark">
+          <i class="ti ti-wave-sine" style="font-size:18px;color:#fff"></i>
+        </div>
+        <div>
+          <div class="logo-text-main">Modern Beach</div>
+          <div class="logo-text-sub">Vacation Rentals</div>
+        </div>
+      </div>
+      <div class="header-tag">Inventory</div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${S.tab==='submit'?'active':''}" onclick="S.tab='submit';render()">
+        <i class="ti ti-plus" style="font-size:15px"></i>Submit
+      </button>
+      <button class="tab ${S.tab==='log'?'active':''}" onclick="S.tab='log';render()">
+        <i class="ti ti-list" style="font-size:15px"></i>Log
+        ${S.log.length?`<span class="tab-badge">${S.log.length}</span>`:''}
+      </button>
+    </div>
+  </div>
+
+  ${S.tab==='submit'?`
+  <div class="content">
+    ${S.done?`
+    <div class="success-banner">
+      <i class="ti ti-circle-check" style="font-size:24px;color:var(--green-text);flex-shrink:0"></i>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--green-text)">Entry logged!</div>
+        <div style="font-size:12px;color:var(--green-text);opacity:0.8;margin-top:2px">Email notification sent to MBVR ops</div>
+      </div>
+    </div>`:''}
+
+    <div class="field">
+      <span class="section-label">Property</span>
+      <input type="text" value="${S.prop}" placeholder="Property name..." oninput="S.prop=this.value">
+    </div>
+    <div class="field">
+      <span class="section-label">Your Name</span>
+      <input type="text" value="${S.staff}" placeholder="Enter your name..." oninput="S.staff=this.value">
+    </div>
+
+    <div class="field">
+      <span class="section-label">Action Type</span>
+      <div class="actions-grid">
+        ${ACTIONS.map(a=>`
+        <button class="act-btn ${S.action===a.id?'sel-'+a.id:''}" onclick="S.action='${a.id}';render()">
+          <i class="ti ${a.icon}"></i><span>${a.label}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="section-label">Items</span>
+
+      ${S.items.length?`
+      <div class="item-list">
+        ${S.items.map((item,idx)=>`
+        <div class="item-row">
+          <div class="item-row-top">
+            <div class="item-row-num">${idx+1}</div>
+            <div class="item-row-info">
+              <div class="item-row-name">${item.name}</div>
+              <div class="item-row-meta">
+                <span style="font-size:12px;font-weight:600;color:var(--text2)">×${item.qty}</span>
+                ${item.low?`<span class="pill" style="background:var(--amber-bg);color:var(--amber-text)"><i class="ti ti-alert-triangle" style="font-size:9px"></i>Low</span>`:''}
+                ${item.img?`<span class="pill" style="background:var(--teal-light);color:var(--teal-dark)"><i class="ti ti-camera" style="font-size:9px"></i>Photo</span>`:''}
+              </div>
+            </div>
+            ${item.img?`<img src="${item.img}" class="item-thumb" alt="photo">`:''}
+            <button class="remove-btn" onclick="removeItem(${item.id})"><i class="ti ti-x" style="font-size:16px"></i></button>
+          </div>
+        </div>`).join('')}
+      </div>`:''}
+
+      <div class="item-entry-box">
+        <div class="item-name-row">
+          <input id="itemInput" type="text" value="${S.itemName}" placeholder="Item name..."
+            oninput="S.itemName=this.value"
+            onkeydown="if(event.key==='Enter'&&S.itemName.trim())addItem()">
+          <button class="add-btn" onclick="addItem()">
+            <i class="ti ti-plus" style="font-size:14px"></i>Add
+          </button>
+        </div>
+        <div class="item-controls">
+          <div class="qty-group">
+            <button class="qty-btn" onclick="if(S.itemQty>1){S.itemQty--;render()}">−</button>
+            <span class="qty-num">${S.itemQty}</span>
+            <button class="qty-btn" onclick="S.itemQty++;render()">+</button>
+          </div>
+          <div class="ctrl-divider"></div>
+          <div class="low-toggle" onclick="S.itemLow=!S.itemLow;render()">
+            <i class="ti ti-alert-triangle" style="font-size:15px;color:${S.itemLow?'var(--amber-bdr)':'var(--text2)'}"></i>
+            <span style="font-size:12px;font-weight:600;color:${S.itemLow?'var(--amber-text)':'var(--text2)'}">${S.itemLow?'Low Stock':'Low Stock'}</span>
+            <div class="toggle-track" style="background:${S.itemLow?'var(--amber-bdr)':'var(--border2)'}">
+              <div class="toggle-thumb" style="left:${S.itemLow?19:3}px"></div>
+            </div>
+          </div>
+          <button class="cam-btn ${S.pendingImg?'has-photo':''}" onclick="document.getElementById('pendingPhotoInput').click()">
+            <i class="ti ti-camera"></i>
+          </button>
+          <input type="file" id="pendingPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePendingPhoto(this)">
+        </div>
+        ${S.pendingImg?`
+        <div class="pending-photo">
+          <img src="${S.pendingImg}" alt="pending photo">
+          <button class="pending-photo-remove" onclick="S.pendingImg=null;render()">
+            <i class="ti ti-x" style="font-size:13px"></i>
+          </button>
+        </div>`:''}
+      </div>
+    </div>
+
+    <button class="voice-btn ${S.listening?'active':''}" onclick="toggleVoice()">
+      <i class="ti ti-microphone" style="font-size:18px"></i>
+      ${S.listening?'Listening — tap to stop':'Voice Note'}
+    </button>
+
+    <div class="field">
+      <span class="section-label">Notes</span>
+      <textarea rows="3" placeholder="Type or dictate a note for this submission…" oninput="S.note=this.value">${S.note}</textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submit()" ${S.items.length===0?'disabled':''}>
+      <i class="ti ti-send" style="font-size:18px"></i>
+      Submit${S.items.length>0?` — ${S.items.length} Item${S.items.length>1?'s':''}` : ''}
+    </button>
+  </div>
+
+  `:`
+  <div class="content">
+    ${vel.length?`
+    <div class="vel-section">
+      <div class="vel-title">Velocity — Top Items Taken</div>
+      ${vel.map(([name,count],i)=>`
+      <div class="vel-row">
+        <span class="vel-rank">${i+1}</span>
+        <span class="vel-name">${name}</span>
+        <span class="vel-count">${count} units</span>
+        <div class="vel-bar-bg"><div class="vel-bar" style="width:${Math.round(count/vel[0][1]*100)}%"></div></div>
+      </div>`).join('')}
+    </div>`:''}
+
+    ${props.length?`
+    <div class="field">
+      <span class="section-label">Filter by Property</span>
+      <select onchange="S.logFilter=this.value;render()">
+        <option value="">All properties</option>
+        ${props.map(p=>`<option value="${p}" ${S.logFilter===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+    </div>`:''}
+
+    ${filtered.length===0?`
+    <div class="empty-state">
+      <i class="ti ti-clipboard-list"></i>
+      <div style="font-size:14px;font-weight:600">No entries yet</div>
+      <div style="font-size:13px;margin-top:4px">Log items using the Submit tab</div>
+    </div>`
+    :filtered.map(e=>{
+      const a=am[e.action];
+      return `
+      <div class="entry-card">
+        <div class="entry-card-header">
+          <span class="pill" style="background:${a.bg};color:${a.color}">
+            <i class="ti ${a.icon}" style="font-size:10px"></i>${a.badge}
+          </span>
+          <span style="font-size:11px;color:rgba(255,255,255,0.45)">${fmtDate(e.ts)}</span>
+        </div>
+        <div class="entry-card-body">
+          <div class="entry-meta">${e.property} &nbsp;·&nbsp; <strong style="color:var(--text)">${e.staff}</strong></div>
+          ${(e.items||[]).map(item=>`
+          <div class="entry-item">
+            <div class="entry-item-row">
+              <span style="font-size:13px;font-weight:600">${item.name}</span>
+              <div style="display:flex;align-items:center;gap:6px">
+                ${item.low?`<span class="pill" style="background:var(--amber-bg);color:var(--amber-text)"><i class="ti ti-alert-triangle" style="font-size:9px"></i>Low</span>`:''}
+                <span style="font-size:13px;font-weight:600;color:var(--text2)">×${item.qty}</span>
+              </div>
+            </div>
+            ${item.img?`<img src="${item.img}" class="entry-item-photo" alt="${item.name}">`:''}
+          </div>`).join('')}
+          ${e.note?`<div class="entry-note">"${e.note}"</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+  `}
+  `;
+}
+
+loadLog();
+render();
+</script>
+</body>
+</html>

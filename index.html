@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<title>MBVR Inventory</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-dark: #0F6E56;
+    --green-border: #639922;
+    --green-bg: #EAF3DE;
+    --blue: #378ADD;
+    --blue-light: #E6F1FB;
+    --blue-dark: #0C447C;
+    --amber: #EF9F27;
+    --amber-light: #FAEEDA;
+    --amber-dark: #633806;
+    --amber-border: #854F0B;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #791F1F;
+    --bg: #ffffff;
+    --bg2: #f5f5f3;
+    --bg3: #efefec;
+    --text: #1a1a18;
+    --text2: #6b6b67;
+    --border: rgba(0,0,0,0.12);
+    --border2: rgba(0,0,0,0.2);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --bg2: #242422;
+      --bg3: #2e2e2b;
+      --text: #f0ede8;
+      --text2: #9a9a94;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.2);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+  #app { max-width: 480px; margin: 0 auto; background: var(--bg); min-height: 100vh; position: relative; }
+  input, select, textarea {
+    background: var(--bg); border: 0.5px solid var(--border2);
+    border-radius: var(--radius); color: var(--text);
+    font-family: inherit; font-size: 15px; width: 100%;
+    padding: 11px 13px; outline: none; -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(29,158,117,0.15); }
+  textarea { resize: none; }
+  .lbl { font-size: 11px; color: var(--text2); display: block; margin-bottom: 6px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .header { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 14px 16px 0; position: sticky; top: 0; z-index: 100; }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .header-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--green-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tabs { display: flex; }
+  .tab { flex: 1; padding: 9px 0; background: transparent; border: none; border-bottom: 2px solid transparent; font-size: 13px; font-weight: 400; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; color: var(--text2); font-family: inherit; }
+  .tab.active { border-bottom-color: var(--green); color: var(--green); font-weight: 500; }
+  .tab-badge { background: var(--green-light); color: var(--green-dark); font-size: 10px; padding: 1px 6px; border-radius: 20px; margin-left: 2px; }
+  .content { padding: 18px 16px 100px; }
+  .field { margin-bottom: 14px; }
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .act-btn { padding: 11px 6px; border-radius: var(--radius); cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; border: 0.5px solid var(--border); background: var(--bg); font-family: inherit; transition: all 0.15s; }
+  .act-btn i { font-size: 20px; color: var(--text2); }
+  .act-btn span { font-size: 11px; color: var(--text); line-height: 1.3; }
+  .act-btn.sel-taking { border: 1.5px solid var(--blue); background: var(--blue-light); }
+  .act-btn.sel-taking i { color: var(--blue); }
+  .act-btn.sel-taking span { color: var(--blue-dark); font-weight: 500; }
+  .act-btn.sel-restocking { border: 1.5px solid var(--green-border); background: var(--green-bg); }
+  .act-btn.sel-restocking i { color: var(--green-dark); }
+  .act-btn.sel-restocking span { color: #27500A; font-weight: 500; }
+  .act-btn.sel-low_stock { border: 1.5px solid var(--amber-border); background: var(--amber-light); }
+  .act-btn.sel-low_stock i { color: var(--amber-border); }
+  .act-btn.sel-low_stock span { color: var(--amber-dark); font-weight: 500; }
+  .item-add-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .add-btn { padding: 11px 16px; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius); color: var(--text); font-size: 13px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0; font-family: inherit; }
+  .add-btn:active { transform: scale(0.97); }
+  .qty-strip { display: flex; align-items: center; gap: 10px; padding: 10px 13px; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 16px; }
+  .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: 0.5px solid var(--border2); background: var(--bg); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); flex-shrink: 0; font-family: inherit; }
+  .divider { width: 0.5px; height: 28px; background: var(--border); flex-shrink: 0; }
+  .toggle-wrap { display: flex; align-items: center; gap: 6px; cursor: pointer; margin-left: auto; }
+  .toggle-track { width: 44px; height: 24px; border-radius: 12px; position: relative; flex-shrink: 0; transition: background 0.2s; }
+  .toggle-thumb { width: 18px; height: 18px; border-radius: 50%; background: white; position: absolute; top: 3px; transition: left 0.2s; }
+  .item-list { margin-bottom: 10px; }
+  .item-row { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .item-row-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item-row-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .pill { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .remove-btn { background: transparent; border: none; cursor: pointer; padding: 4px; color: var(--text2); flex-shrink: 0; }
+  .icon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .icon-btn { border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg2); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 13px 8px; font-family: inherit; }
+  .icon-btn i { font-size: 22px; color: var(--text2); }
+  .icon-btn span { font-size: 12px; color: var(--text2); }
+  .icon-btn.active-photo { border-color: var(--green); background: var(--green-light); }
+  .icon-btn.active-photo i, .icon-btn.active-photo span { color: var(--green-dark); }
+  .icon-btn.active-voice { border-color: var(--red); background: var(--red-light); }
+  .icon-btn.active-voice i, .icon-btn.active-voice span { color: var(--red-dark); }
+  .photo-preview { position: relative; margin-bottom: 14px; }
+  .photo-preview img { width: 100%; border-radius: var(--radius); max-height: 180px; object-fit: cover; display: block; }
+  .photo-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.55); border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
+  .submit-btn { width: 100%; padding: 15px; background: var(--green); border: none; border-radius: var(--radius); color: white; font-size: 16px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .success-banner { background: var(--green-bg); border: 0.5px solid var(--green-border); border-radius: var(--radius); padding: 13px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .entry-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; margin-bottom: 10px; }
+  .entry-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+  .entry-meta { font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .entry-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 0.5px solid var(--border); }
+  .entry-note { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 8px; padding-top: 7px; border-top: 0.5px solid var(--border); }
+  .vel-bar-bg { width: 52px; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+  .vel-bar { height: 100%; background: var(--green); border-radius: 2px; }
+  .filter-wrap { margin-bottom: 16px; }
+  .empty-state { text-align: center; padding: 50px 0; color: var(--text2); }
+  .empty-state i { font-size: 40px; display: block; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<!-- EmailJS — fill in your credentials below -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+// ── EMAIL CONFIG ─────────────────────────────────────────────
+// 1. Sign up free at emailjs.com
+// 2. Create a service (Gmail works) and an email template
+// 3. Fill in the three values below
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+const NOTIFY_EMAIL        = 'ops@modernbeachvacationrentals.com'; // destination address
+// ────────────────────────────────────────────────────────────
+
+const ACTIONS = [
+  { id:'taking',    label:'Taking Items',    icon:'ti-package-export', badge:'Took',       bg:'#E6F1FB', color:'#0C447C', border:'#378ADD' },
+  { id:'restocking',label:'Restocking',      icon:'ti-package-import', badge:'Restocked',  bg:'#EAF3DE', color:'#27500A', border:'#639922' },
+  { id:'low_stock', label:'Low Stock Alert', icon:'ti-alert-triangle', badge:'Low Stock',  bg:'#FAEEDA', color:'#633806', border:'#854F0B' }
+];
+const KEY = 'mbvr_inventory_v1';
+
+let S = {
+  tab:'submit', log:[],
+  prop:'', staff:'', action:'taking',
+  itemName:'', itemQty:1, itemLow:false, items:[],
+  note:'', img:null, listening:false, done:false,
+  logFilter:''
+};
+let recog = null;
+
+function loadLog() {
+  try { const d = localStorage.getItem(KEY); if (d) S.log = JSON.parse(d); } catch {}
+}
+function saveLog() {
+  try { localStorage.setItem(KEY, JSON.stringify(S.log.slice(0,500))); } catch {}
+}
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
+         d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+function velocity() {
+  const m = {};
+  S.log.forEach(e => {
+    if (e.action==='taking' && e.items) e.items.forEach(i => { m[i.name] = (m[i.name]||0) + (i.qty||1); });
+  });
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,6);
+}
+function compress(file, cb) {
+  const canvas = document.createElement('canvas'), img = new Image(), url = URL.createObjectURL(file);
+  img.onload = () => {
+    let w=img.width, h=img.height, max=700;
+    if (w>max){h=h*max/w;w=max;} if (h>max){w=w*max/h;h=max;}
+    canvas.width=w; canvas.height=h;
+    canvas.getContext('2d').drawImage(img,0,0,w,h);
+    cb(canvas.toDataURL('image/jpeg',0.7)); URL.revokeObjectURL(url);
+  }; img.src=url;
+}
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice input is not supported on this browser. Try Chrome on Android.'); return; }
+  if (S.listening) { recog && recog.stop(); S.listening=false; render(); return; }
+  const r = new SR(); r.continuous=false; r.interimResults=false;
+  r.onresult = e => { S.note = (S.note+(S.note?' ':'')+e.results[0][0].transcript).trim(); S.listening=false; render(); };
+  r.onerror = r.onend = () => { S.listening=false; render(); };
+  r.start(); recog=r; S.listening=true; render();
+}
+function addItem() {
+  const name = S.itemName.trim(); if (!name) return;
+  S.items = [...S.items, {id:Date.now(), name, qty:S.itemQty, low:S.itemLow}];
+  S.itemName=''; S.itemQty=1; S.itemLow=false; render();
+  setTimeout(()=>{ const el=document.getElementById('itemInput'); if(el) el.focus(); },50);
+}
+function removeItem(id) { S.items=S.items.filter(i=>i.id!==id); render(); }
+
+async function sendEmail(entry) {
+  if (EMAILJS_PUBLIC_KEY==='YOUR_PUBLIC_KEY') return; // not configured yet
+  const am = Object.fromEntries(ACTIONS.map(a=>[a.id,a]));
+  const itemLines = entry.items.map(i=>`  • ${i.name} ×${i.qty}${i.low?' ⚠️ LOW STOCK':''}`).join('\n');
+  try {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email:   NOTIFY_EMAIL,
+      property:   entry.property,
+      staff:      entry.staff,
+      action:     am[entry.action].badge,
+      items:      itemLines,
+      note:       entry.note || 'None',
+      timestamp:  fmtDate(entry.ts)
+    });
+  } catch(e) { console.warn('EmailJS error:', e); }
+}
+
+async function submit() {
+  if (!S.prop.trim() || !S.staff.trim() || S.items.length===0) {
+    alert('Please enter a property, your name, and add at least one item.'); return;
+  }
+  const entry = {
+    id: Date.now(), property:S.prop.trim(), staff:S.staff.trim(),
+    action:S.action, items:S.items, note:S.note, img:S.img,
+    ts: new Date().toISOString()
+  };
+  S.log = [entry, ...S.log]; saveLog();
+  await sendEmail(entry);
+  S.done=true; S.items=[]; S.itemName=''; S.itemQty=1; S.itemLow=false; S.note=''; S.img=null;
+  render(); setTimeout(()=>{ S.done=false; render(); }, 3000);
+}
+
+function handlePhoto(input) {
+  const f=input.files[0]; if(!f) return;
+  compress(f, src=>{ S.img=src; render(); });
+}
+
+function getProps() { return [...new Set(S.log.map(e=>e.property))].sort(); }
+
+function render() {
+  const app = document.getElementById('app');
+  const vel = velocity();
+  const props = getProps();
+  const filtered = S.logFilter ? S.log.filter(e=>e.property===S.logFilter) : S.log;
+  const am = Object.fromEntries(ACTIONS.map(a=>[a.id,a]));
+
+  app.innerHTML = `
+  <div class="header">
+    <div class="header-top">
+      <div class="header-icon">
+        <i class="ti ti-wave-sine" style="font-size:19px;color:#1D9E75"></i>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:600;line-height:1.2">MBVR Inventory</div>
+        <div style="font-size:11px;color:var(--text2)">Modern Beach Vacation Rentals</div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${S.tab==='submit'?'active':''}" onclick="S.tab='submit';render()">
+        <i class="ti ti-plus" style="font-size:14px"></i>Submit
+      </button>
+      <button class="tab ${S.tab==='log'?'active':''}" onclick="S.tab='log';render()">
+        <i class="ti ti-list" style="font-size:14px"></i>Log
+        ${S.log.length ? `<span class="tab-badge">${S.log.length}</span>` : ''}
+      </button>
+    </div>
+  </div>
+
+  ${S.tab==='submit' ? `
+  <div class="content">
+    ${S.done ? `
+    <div class="success-banner">
+      <i class="ti ti-circle-check" style="font-size:22px;color:#3B6D11;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:14px;font-weight:600;color:#27500A">Entry logged!</div>
+        <div style="font-size:12px;color:#3B6D11">Email notification sent to MBVR ops</div>
+      </div>
+    </div>` : ''}
+
+    <div class="field">
+      <label class="lbl">Property</label>
+      <input type="text" value="${S.prop}" placeholder="Enter property name..." oninput="S.prop=this.value">
+    </div>
+
+    <div class="field">
+      <label class="lbl">Your Name</label>
+      <input type="text" value="${S.staff}" placeholder="Enter your name..." oninput="S.staff=this.value">
+    </div>
+
+    <div class="field">
+      <label class="lbl">Action Type</label>
+      <div class="actions-grid">
+        ${ACTIONS.map(a=>`
+        <button class="act-btn ${S.action===a.id?'sel-'+a.id:''}" onclick="S.action='${a.id}';render()">
+          <i class="ti ${a.icon}"></i>
+          <span>${a.label}</span>
+        </button>`).join('')}
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="lbl">Items</label>
+      ${S.items.length ? `
+      <div class="item-list">
+        ${S.items.map(item=>`
+        <div class="item-row">
+          <div style="flex:1;min-width:0">
+            <div class="item-row-name">${item.name}</div>
+            <div class="item-row-meta">
+              <span style="font-size:12px;color:var(--text2)">×${item.qty}</span>
+              ${item.low?`<span class="pill" style="background:#FAEEDA;color:#633806"><i class="ti ti-alert-triangle" style="font-size:10px"></i>Low stock</span>`:''}
+            </div>
+          </div>
+          <button class="remove-btn" onclick="removeItem(${item.id})"><i class="ti ti-x" style="font-size:16px"></i></button>
+        </div>`).join('')}
+      </div>` : ''}
+
+      <div class="item-add-row">
+        <input id="itemInput" type="text" value="${S.itemName}" placeholder="Item name..."
+          style="flex:1" oninput="S.itemName=this.value"
+          onkeydown="if(event.key==='Enter'&&S.itemName.trim())addItem()">
+        <button class="add-btn" onclick="addItem()"><i class="ti ti-plus" style="font-size:14px"></i>Add</button>
+      </div>
+
+      <div class="qty-strip">
+        <span class="lbl" style="margin:0">Qty</span>
+        <button class="qty-btn" onclick="if(S.itemQty>1){S.itemQty--;render()}">−</button>
+        <span style="font-size:17px;font-weight:600;min-width:22px;text-align:center">${S.itemQty}</span>
+        <button class="qty-btn" onclick="S.itemQty++;render()">+</button>
+        <div class="divider"></div>
+        <div class="toggle-wrap" onclick="S.itemLow=!S.itemLow;render()">
+          <i class="ti ti-alert-triangle" style="font-size:16px;color:${S.itemLow?'#854F0B':'var(--text2)'}"></i>
+          <span style="font-size:12px;color:${S.itemLow?'#854F0B':'var(--text2)'};font-weight:${S.itemLow?500:400}">Low stock</span>
+          <div class="toggle-track" style="background:${S.itemLow?'#EF9F27':'var(--border2)'}">
+            <div class="toggle-thumb" style="left:${S.itemLow?23:3}px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="icon-grid">
+      <button class="icon-btn ${S.img?'active-photo':''}" onclick="document.getElementById('photoInput').click()">
+        <i class="ti ti-camera"></i>
+        <span>${S.img?'Photo added':'Add photo'}</span>
+      </button>
+      <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(this)">
+      <button class="icon-btn ${S.listening?'active-voice':''}" onclick="toggleVoice()">
+        <i class="ti ti-microphone"></i>
+        <span>${S.listening?'Listening…':'Voice note'}</span>
+      </button>
+    </div>
+
+    ${S.img ? `
+    <div class="photo-preview">
+      <img src="${S.img}" alt="Item photo">
+      <button class="photo-remove" onclick="S.img=null;render()"><i class="ti ti-x" style="font-size:14px"></i></button>
+    </div>` : ''}
+
+    <div class="field">
+      <label class="lbl">Notes</label>
+      <textarea rows="3" placeholder="Tap mic to dictate or type a note…" oninput="S.note=this.value">${S.note}</textarea>
+    </div>
+
+    <button class="submit-btn" onclick="submit()" ${S.items.length===0?'disabled':''}>
+      <i class="ti ti-send" style="font-size:18px"></i>
+      Submit ${S.items.length>0?`(${S.items.length} item${S.items.length>1?'s':''})` : ''}
+    </button>
+  </div>
+
+  ` : `
+  <div class="content">
+    ${vel.length ? `
+    <div style="margin-bottom:20px">
+      <div class="lbl" style="margin-bottom:10px">Velocity — Top Items Taken</div>
+      ${vel.map(([name,count],i)=>`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+        <span style="font-size:11px;color:var(--text2);width:14px;text-align:right">${i+1}</span>
+        <span style="font-size:13px;flex:1">${name}</span>
+        <span class="pill" style="background:#E1F5EE;color:#0F6E56">${count} units</span>
+        <div class="vel-bar-bg"><div class="vel-bar" style="width:${Math.round(count/vel[0][1]*100)}%"></div></div>
+      </div>`).join('')}
+    </div>
+    <div style="height:0.5px;background:var(--border);margin-bottom:16px"></div>` : ''}
+
+    ${props.length ? `
+    <div class="filter-wrap">
+      <label class="lbl">Filter by Property</label>
+      <select onchange="S.logFilter=this.value;render()">
+        <option value="">All properties</option>
+        ${props.map(p=>`<option value="${p}" ${S.logFilter===p?'selected':''}>${p}</option>`).join('')}
+      </select>
+    </div>` : ''}
+
+    ${filtered.length===0 ? `
+    <div class="empty-state">
+      <i class="ti ti-clipboard-list"></i>
+      <div style="font-size:14px">No entries yet</div>
+      <div style="font-size:12px;margin-top:4px">Log items using the Submit tab</div>
+    </div>` :
+    filtered.map(e=>{
+      const a = am[e.action];
+      return `
+      <div class="entry-card">
+        <div class="entry-header">
+          <span class="pill" style="background:${a.bg};color:${a.color}">
+            <i class="ti ${a.icon}" style="font-size:10px"></i>${a.badge}
+          </span>
+          <span style="font-size:11px;color:var(--text2)">${fmtDate(e.ts)}</span>
+        </div>
+        <div class="entry-meta">${e.property} · <strong>${e.staff}</strong></div>
+        ${(e.items||[]).map(item=>`
+        <div class="entry-item">
+          <span style="font-size:13px">${item.name}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            ${item.low?`<span class="pill" style="background:#FAEEDA;color:#633806"><i class="ti ti-alert-triangle" style="font-size:10px"></i>Low</span>`:''}
+            <span style="font-size:13px;color:var(--text2)">×${item.qty}</span>
+          </div>
+        </div>`).join('')}
+        ${e.note?`<div class="entry-note">"${e.note}"</div>`:''}
+        ${e.img?`<img src="${e.img}" style="width:100%;border-radius:var(--radius);margin-top:8px;max-height:120px;object-fit:cover;display:block" alt="Item photo">`:''}
+      </div>`;
+    }).join('')}
+  </div>
+  `}
+  `;
+}
+
+loadLog();
+render();
+</script>
+</body>
+</html>
